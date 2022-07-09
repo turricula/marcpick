@@ -116,9 +116,10 @@ class MarcPick:
         if not isinstance(condition, str):
             return False
         if not (condition := condition.strip().replace('\r', '').replace(
-                '\n', '').replace('\\ ', '\t').replace('\\)', '\v')):
+                '\n', '').replace('\\ ', '\0').replace('\\(', '\t').replace(
+            '\\)', '\v')):
             return True
-        pattern = '([0-9A-Za-z@]{3}[0-9A-Za-z@#]{2}[0-9A-Za-z@][^ \\)]*)'
+        pattern = '([0-9A-Za-z@]{3}[0-9A-Za-z@#]{2}[0-9A-Za-z@][^ \)]*)'
         for cond in re.findall(pattern, condition):
             if len(cond) < 6 or not cond[:6].isprintable():
                 return False
@@ -126,8 +127,8 @@ class MarcPick:
                 regex = None
             else:
                 try:
-                    regex = re.compile(
-                        cond[6:].replace('\t', ' ').replace('\v', ')'))
+                    regex = re.compile(cond[6:].replace('\0', ' ').replace(
+                        '\t', '(').replace('\v', ')'))
                 except re.error:
                     return False
             label = cond[:6].lower().replace(self._IND, ' ')
